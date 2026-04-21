@@ -1,5 +1,6 @@
 package com.udb.dwf404.empleadodepartamento.controller;
 
+import com.udb.dwf404.empleadodepartamento.dto.EmpleadoResponseDTO;
 import com.udb.dwf404.empleadodepartamento.entity.Empleado;
 import com.udb.dwf404.empleadodepartamento.service.EmpleadoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/empleados")
@@ -17,13 +19,9 @@ public class EmpleadoController {
     @Autowired
     private EmpleadoService empleadoService;
 
-    /**
-     * POST: Crear un nuevo empleado
-     * Formato del body: {"nombreCompleto": "...", "correo": "...", "cargo": "...", "salario": ..., "departamento": {"id": ...}}
-     */
     @PostMapping
     public ResponseEntity<Empleado> createEmpleado(@RequestBody Empleado empleado,
-                                                    @RequestParam Long departamentoId) {
+                                                   @RequestParam Long departamentoId) {
         try {
             Empleado nuevoEmpleado = empleadoService.createEmpleado(empleado, departamentoId);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoEmpleado);
@@ -32,35 +30,28 @@ public class EmpleadoController {
         }
     }
 
-    /**
-     * GET: Obtener todos los empleados
-     */
     @GetMapping
-    public ResponseEntity<List<Empleado>> getAllEmpleados() {
+    public ResponseEntity<List<EmpleadoResponseDTO>> getAllEmpleados() {
         List<Empleado> empleados = empleadoService.getAllEmpleados();
-        return ResponseEntity.ok(empleados);
+        List<EmpleadoResponseDTO> response = empleados.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
-    /**
-     * GET: Obtener empleado por ID
-     */
     @GetMapping("/{id}")
-    public ResponseEntity<Empleado> getEmpleadoById(@PathVariable Long id) {
+    public ResponseEntity<EmpleadoResponseDTO> getEmpleadoById(@PathVariable Long id) {
         Optional<Empleado> empleado = empleadoService.getEmpleadoById(id);
         if (empleado.isPresent()) {
-            return ResponseEntity.ok(empleado.get());
+            return ResponseEntity.ok(convertToDTO(empleado.get()));
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
 
-    /**
-     * PUT: Actualizar empleado
-     * Formato del body: {"nombreCompleto": "...", "correo": "...", "cargo": "...", "salario": ..., "departamento": {"id": ...}}
-     */
     @PutMapping("/{id}")
     public ResponseEntity<Empleado> updateEmpleado(@PathVariable Long id,
-                                                    @RequestBody Empleado empleadoDetails) {
+                                                   @RequestBody Empleado empleadoDetails) {
         try {
             Empleado empleadoActualizado = empleadoService.updateEmpleado(id, empleadoDetails);
             return ResponseEntity.ok(empleadoActualizado);
@@ -69,9 +60,6 @@ public class EmpleadoController {
         }
     }
 
-    /**
-     * DELETE: Borrar empleado
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteEmpleado(@PathVariable Long id) {
         try {
@@ -80,5 +68,23 @@ public class EmpleadoController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Empleado no encontrado");
         }
+    }
+
+    private EmpleadoResponseDTO convertToDTO(Empleado empleado) {
+        EmpleadoResponseDTO dto = new EmpleadoResponseDTO();
+        dto.setId(empleado.getId());
+        dto.setNombreCompleto(empleado.getNombreCompleto());
+        dto.setCorreo(empleado.getCorreo());
+        dto.setCargo(empleado.getCargo());
+        dto.setSalario(empleado.getSalario());
+
+        if (empleado.getDepartamento() != null) {
+            EmpleadoResponseDTO.DepartamentoInfoDTO deptDto = new EmpleadoResponseDTO.DepartamentoInfoDTO();
+            deptDto.setId(empleado.getDepartamento().getId());
+            deptDto.setNombre(empleado.getDepartamento().getNombre());
+            deptDto.setDescripcion(empleado.getDepartamento().getDescripcion());
+            dto.setDepartamento(deptDto);
+        }
+        return dto;
     }
 }

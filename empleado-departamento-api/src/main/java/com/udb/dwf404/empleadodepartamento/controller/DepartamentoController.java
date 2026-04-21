@@ -17,10 +17,6 @@ public class DepartamentoController {
     @Autowired
     private DepartamentoService departamentoService;
 
-    /**
-     * POST: Crear un nuevo departamento
-     * Formato del body: {"nombre": "...", "descripcion": "..."}
-     */
     @PostMapping
     public ResponseEntity<Departamento> createDepartamento(@RequestBody Departamento departamento) {
         try {
@@ -31,18 +27,12 @@ public class DepartamentoController {
         }
     }
 
-    /**
-     * GET: Obtener todos los departamentos
-     */
     @GetMapping
     public ResponseEntity<List<Departamento>> getAllDepartamentos() {
         List<Departamento> departamentos = departamentoService.getAllDepartamentos();
         return ResponseEntity.ok(departamentos);
     }
 
-    /**
-     * GET: Obtener departamento por ID
-     */
     @GetMapping("/{id}")
     public ResponseEntity<Departamento> getDepartamentoById(@PathVariable Long id) {
         Optional<Departamento> departamento = departamentoService.getDepartamentoById(id);
@@ -53,10 +43,6 @@ public class DepartamentoController {
         }
     }
 
-    /**
-     * PUT: Actualizar departamento
-     * Formato del body: {"nombre": "...", "descripcion": "..."}
-     */
     @PutMapping("/{id}")
     public ResponseEntity<Departamento> updateDepartamento(@PathVariable Long id,
                                                            @RequestBody Departamento departamentoDetails) {
@@ -68,9 +54,6 @@ public class DepartamentoController {
         }
     }
 
-    /**
-     * DELETE: Borrar departamento
-     */
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteDepartamento(@PathVariable Long id) {
         try {

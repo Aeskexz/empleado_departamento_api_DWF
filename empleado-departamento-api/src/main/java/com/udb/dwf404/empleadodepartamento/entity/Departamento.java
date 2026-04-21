@@ -4,6 +4,10 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -11,6 +15,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "empleados")
+@EqualsAndHashCode(exclude = "empleados")
 public class Departamento {
 
     @Id
@@ -24,5 +30,6 @@ public class Departamento {
     private String descripcion;
 
     @OneToMany(mappedBy = "departamento", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Empleado> empleados;
+    @JsonManagedReference
+    private List<Empleado> empleados = new ArrayList<>();
 }

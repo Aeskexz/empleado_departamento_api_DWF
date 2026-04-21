@@ -4,12 +4,17 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "empleados")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@ToString(exclude = "departamento")
+@EqualsAndHashCode(exclude = "departamento")
 public class Empleado {
 
     @Id
@@ -28,7 +33,8 @@ public class Empleado {
     @Column(nullable = false)
     private Double salario;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "departamento_id", nullable = false)
+    @JsonBackReference
     private Departamento departamento;
 }
